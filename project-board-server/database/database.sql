@@ -1,0 +1,85 @@
+--
+create database projectBoard_Backend;
+
+
+-- siteusers with uuid
+create table siteusers(
+  userId varchar(36) primary key,
+  firstName varchar(50) not null,
+  lastName varchar(50) not null,
+  email varchar(60) not null unique,
+  userPassword varchar(80) not null,
+  createdDateTime varchar(30) not null
+);
+
+-- password will make problem, while inserting directly from mysql
+insert into siteusers (userId, firstName, lastName, email, userPassword, createdDateTime) values \
+('41ea59df-b404-48a6-82f8-8136e5097abc', 'Agam', 'Jisu', 'agam@example.com', '12345', '2020-01-01T10:26:36.497+01:00');
+insert into siteusers (userId, firstName, lastName, email, userPassword, createdDateTime) values \
+('a3bc53cb-b048-41e9-a4b4-68ed9bcf9e75', 'Nimat', 'Igle', 'nimat@example.com', '12345', '2020-01-02T14:37:54.967+01:00');
+
+
+-- projects with uuid
+create table projects(
+  projectsId varchar(36) primary key,
+  title varchar(50) not null,
+  content varchar(200) not null,
+  userId varchar(36) not null,
+  createdDateTime varchar(30) not null,
+  foreign key (userId) references siteusers(userId)
+);
+
+insert into projects (projectsId, title, content, userId, createdDateTime) values \
+('6ba6d6b3-8016-4c39-8890-e7ee3ce0d8ac', 'Title1', 'Some content1', '41ea59df-b404-48a6-82f8-8136e5097abc', '2020-01-03T10:16:36.497+01:00');
+insert into projects (projectsId, title, content, userId, createdDateTime) values \
+('b26ca3f2-36a1-467b-b73a-a5aeb90319f5', 'Title2', 'Some content2', '0ea0b6fa-3001-4d3b-9112-b26ba9da8065', '2020-01-04T17:36:36.497+01:00');
+
+
+-- notifications table with uuid
+create table notifications(
+  notificationId varchar(36) primary key,
+  content varchar(30) not null,
+  userIdOrEmail varchar(60) not null,
+  createdDateTime varchar(30) not null
+);
+
+insert into notifications (notificationId, content, userIdOrEmail, createdDateTime) values \
+('94036220-8df3-4763-bed6-7f4d23832997', 'Joined the party', \
+'41ea59df-b404-48a6-82f8-8136e5097abc', '2020-01-01T10:26:36.497+01:00');
+insert into notifications (notificationId, content, userIdOrEmail, createdDateTime) values \
+('e1d47a49-b71b-43da-9ac2-0a905fd91d04', 'Added a new project', \
+'a3bc53cb-b048-41e9-a4b4-68ed9bcf9e75', '2020-01-03T10:16:36.497+01:00');
+
+
+-- All projects with user firstName and lastName (example)
+select 
+projectsId, title, content, firstName, lastName, t1.createdDateTime
+from projects t1
+inner join siteusers t2
+on t1.userId = t2.userId
+ORDER BY t1.createdDateTime DESC
+LIMIT 7;
+
+-- Project with userfullname (example)
+select 
+projectsId, title, content, firstName, lastName, t1.createdDateTime
+from projects t1
+inner join siteusers t2
+on t1.userId = t2.userId
+where t1.projectsId = 1 
+and t2.userId = 2;
+
+
+-- For sign in (example)
+SELECT * FROM projectBoard_Backend.siteusers WHERE email='agam@example.com' and userPassword='12345';
+
+-- For notification (example)
+SELECT
+notificationId, content, firstName, lastName, t1.createdDateTime
+FROM notifications t1
+INNER JOIN siteusers t2
+ON t1.userIdOrEmail = t2.userId
+OR t1.userIdOrEmail = t2.email
+ORDER BY t1.createdDateTime DESC
+LIMIT 3;
+
